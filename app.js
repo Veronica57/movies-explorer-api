@@ -6,7 +6,7 @@ const { errors } = require('celebrate');
 const cors = require('./middlewares/cors');
 const limiter = require('./middlewares/limit');
 const router = require('./routes/index');
-const errorHandler = require('./middlewares/error');
+const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { MONGO_URL_DEV } = require('./utils/constants');
 
@@ -34,6 +34,6 @@ app.use(errorLogger);
 
 app.use(errors());
 
-app.use(errorHandler);
+app.use(error);
 
 app.listen(PORT);

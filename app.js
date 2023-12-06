@@ -10,30 +10,21 @@ const error = require('./middlewares/error');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { MONGO_URL_DEV } = require('./utils/constants');
 
+const app = express();
+const { PORT = 3000 } = process.env;
 const { NODE_ENV, MONGO_URL } = process.env;
 
-const { PORT = 3000 } = process.env;
-
-const app = express();
-
 mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV);
-
+app.use(cors);
 app.use(express.json());
 
-app.use(cors);
+app.use(requestLogger); // логгер запросов #1
+app.use(helmet()); // Защита приложения Express
 
-app.use(requestLogger);
-
-app.use(helmet());
-
-app.use(limiter);
-
-app.use(router);
-
-app.use(errorLogger);
-
-app.use(errors());
-
-app.use(error);
+app.use(limiter); // Обработчик ограничений запросов
+app.use(router); // Обработчики роутов #2
+app.use(errorLogger); // логгер ошибок #3
+app.use(errors()); // обработчик ошибок celebrate #4
+app.use(error); // server error централизованный обработчик ошибок #5
 
 app.listen(PORT);

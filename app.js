@@ -15,10 +15,10 @@ const limiter = require('./middlewares/limiter');
 
 const { MONGO_URL_DEV } = require('./utils/constants');
 
-const { PORT = 3001, NODE_ENV, MONGO_URL } = process.env;
-// const { NODE_ENV, MONGO_URL } = process.env;
+const { PORT = 3000, NODE_ENV, MONGO_URL } = process.env;
+
 mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV);
-// mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb');
+
 const app = express();
 app.use(requestLogger); // логгер запросов #1
 
@@ -28,7 +28,6 @@ app.use(cookieParser);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: allowedURLs, credentials: true }));
-// app.use(express.json());
 
 app.use(router); // Обработчики роутов #2
 app.use(errorLogger); // логгер ошибок #3

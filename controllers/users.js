@@ -1,96 +1,74 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const BadRequestError = require('../errors/badrequest');
+
 const NotFoundError = require('../errors/notfound');
-const ConflictedError = require('../errors/conflict');
+
 const { JWT_SECRET_DEV } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
-const { CREATED_CODE } = require('../utils/codes');
+
+const { CREATED_CODE, LOGIN_SUCCESS_MESSAGE, LOGOUT_MESSAGE  } = require('../utils/codes');
+
 
 const createUser = (req, res, next) => {
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      email: req.body.email,
-      password: hash,
-      name: req.body.name,
-    }))
-    .then((user) => res.status(CREATED_CODE).send({
-      email: user.email,
-      name: user.name,
-      _id: user._id,
-    }))
-    .catch((err) => {
-      if (err.code === 11000) {
-        next(new ConflictedError('User already exists'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequestError('Incorrect data'));
-      } else {
-        next(err);
-      }
-    });
+  const { name, email, password } = req.body;
+  bcrypt.hash(password, 10).then((hash) => {
+    User.create({ name, email, password: hash })
+      .then((user) => {
+        const returnUser = user.toObject();
+        delete returnUser.password;
+        res.status(CREATED_CODE).send(returnUser);
+      })
+      .catch(next);
+  });
 };
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : JWT_SECRET_DEV,
-        { expiresIn: '7d' },
+        NODE_ENV !== 'production' ? JWT_SECRET_DEV: JWT_SECRET,
+        { expiresIn: '7d' }
       );
-      res.send({ token });
+      res.cookie('jwt', token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: true
+      });
+      res.send({ _id: user._id, message: LOGIN_SUCCESS_MESSAGE });
     })
     .catch(next);
 };
 
-const getCurrentUser = (req, res, next) => {
-  const userId = req.user._id;
-  User.findById(userId)
-    .orFail(() => {
-      throw new NotFoundError('User._id Not Found');
+const getUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(() => new NotFoundError())
+    .then((user) => res.send(user))
+    .catch(next);
+};
+
+
+const logout = (req, res, next) => {
+  const { email } = req.body;
+  User.findOne({ email })
+    .then(() => {
+      res.clearCookie('jwt', { httpOnly: true, sameSite: true }).send({ message: LOGOUT_MESSAGE  });
     })
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('User Not Found'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const updateUser = (req, res, next) => {
-  const { email, name } = req.body;
-  User.findByIdAndUpdate(
-    req.user._id,
-    { email, name },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .orFail(() => {
-      throw new NotFoundError('User._id Not Found');
-    })
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err.code === 11000) {
-        next(new ConflictedError('User already exists'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequestError('Incorrect data'));
-      } else {
-        next(err);
-      }
-    });
+  const { name, email } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
+    .orFail(() => new NotFoundError())
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
+
 module.exports = {
-  createUser, getCurrentUser, updateUser, login,
+  createUser, getUser, updateUser, login, logout,
 };

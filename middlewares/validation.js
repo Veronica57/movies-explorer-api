@@ -1,60 +1,66 @@
 const { Joi, celebrate } = require('celebrate');
 
-const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const { BadRequestError } = require('../errors/badrequest');
 
-// login validation
-const loginValidator = celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email({ tlds: { allow: false } }),
-    password: Joi.string().required(),
-  }),
-});
+// const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
-// create user validation
-const createUserValidator = celebrate({
+const validateUrl = Joi.string()
+  .required()
+  .custom((value, helpers) => {
+    if (validator.isURL(value)) {
+      return value;
+    }
+    return helpers.message(BadRequestError);
+  });
+
+const validateUpdateUser = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required().email({ tlds: { allow: false } }),
-    password: Joi.string().required(),
-  }),
+    email: Joi.string().required().email()
+  })
 });
 
-// create movie validation
-const createMovieValidator = celebrate({
+const validateCreateMovie = celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),
     duration: Joi.number().required(),
-    year: Joi.number().required(),
+    year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().regex(urlRegex),
-    trailerLink: Joi.string().required().regex(urlRegex),
-    thumbnail: Joi.string().required().regex(urlRegex),
+    image: validateUrl,
+    trailerLink: validateUrl,
+    thumbnail: validateUrl,
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
-    nameEN: Joi.string().required(),
-  }),
+    nameEN: Joi.string().required()
+  })
 });
 
-// delete movie validation
-const deleteMovieValidator = celebrate({
+const validateDeleteMovie = celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().required().hex().length(24),
-  }),
+    id: Joi.string().required().length(24).hex()
+  })
 });
 
-// update user validation
-const updateUserValidator = celebrate({
+const validateLogin = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required().email({ tlds: { allow: false } }),
-  }),
+    email: Joi.string().required().email(),
+    password: Joi.string().required()
+  })
+});
+
+const validateCreateUser = celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30)
+  })
 });
 
 module.exports = {
-  loginValidator,
-  createUserValidator,
-  createMovieValidator,
-  deleteMovieValidator,
-  updateUserValidator,
+  validateUpdateUser,
+  validateCreateMovie,
+  validateDeleteMovie,
+  validateLogin,
+  validateCreateUser
 };

@@ -1,17 +1,17 @@
 const Movie = require('../models/movie');
 const NotFoundError = require('../errors/notfound');
-const BadRequestError = require('../errors/badrequest');
+// const BadRequestError = require('../errors/badrequest');
 const ForbiddenError = require('../errors/forbidden');
 
 const getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
-    .then((movies) => {
-      res.send(movies);
-    })
+    .orFail(() => new NotFoundError())
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
 const createMovie = (req, res, next) => {
+  const owner = req.user._id;
   const {
     country,
     director,
@@ -20,11 +20,12 @@ const createMovie = (req, res, next) => {
     description,
     image,
     trailerLink,
-    thumbnail,
-    movieId,
     nameRU,
     nameEN,
+    thumbnail,
+    movieId
   } = req.body;
+
   Movie.create({
     country,
     director,
@@ -33,50 +34,27 @@ const createMovie = (req, res, next) => {
     description,
     image,
     trailerLink,
-    thumbnail,
-    movieId,
     nameRU,
     nameEN,
-    owner: req.user._id,
+    thumbnail,
+    movieId,
+    owner
   })
     .then((movie) => res.send(movie))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(
-          new BadRequestError(
-            'Incorrect data',
-          ),
-        );
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.findById(req.params.movieId)
-    .orFail(() => {
-      throw new NotFoundError('Movie._id not found');
-    })
+  Movie.findById(req.params.id)
     .then((movie) => {
-      const owner = movie.owner.toString();
-      if (req.user._id === owner) {
-        Movie.deleteOne(movie)
-          .then(() => {
-            res.send(movie);
-          })
-          .catch(next);
+      if (!movie) throw new NotFoundError();
+      else if (req.user._id !== movie.owner.toString()) {
+        throw new ForbiddenError();
       } else {
-        throw new ForbiddenError('Impossible to delete');
+        return movie.deleteOne().then(() => res.send(movie));
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Incorrect data'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports = {

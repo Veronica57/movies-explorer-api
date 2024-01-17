@@ -1,0 +1,56 @@
+###
+POST http://localhost:3000/signup 
+
+Content-Type: application/json
+
+{
+    "name":"Maxim",
+    "email":"maxim@mail.ru",
+    "password":"456789"
+}
+
+###
+POST http://localhost:3000/signin
+
+Content-Type: application/json
+
+{
+    "email":"simba@mail.ru",
+    "password":"123456"
+}
+
+###
+GET http://localhost:3000/users/me
+
+###
+PATCH http://localhost:3000/users/me
+
+Content-Type: application/json
+
+{
+    "name": "New Name"
+}
+
+###
+GET http://localhost:3000/movies
+
+###
+POST http://localhost:3000/movies
+
+Content-Type: application/json
+
+{
+    "country":"Ирландия ",
+    "director":"Кевин Лидди",
+    "year":"2010",
+    "description":"",
+    "image":"",
+    "trailerLink":"",
+    "nameRU":"Страна",
+    "nameEN":"Country",
+    "thumbnail":"",
+    "owner":""
+}
+
+###
+DELETE POST http://localhost:3000/movies/id

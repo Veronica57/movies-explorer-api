@@ -48,7 +48,7 @@ const movieSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    // ref: 'user',
+    ref: 'user',
     required: [true, 'Поле "id пользователя" должно быть заполнено'],
   },
   movieId: {
@@ -63,6 +63,6 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Поле "название фильма на английском" должно быть заполнено'],
   },
-});
+}, { versionKey: false });
 
 module.exports = mongoose.model('movie', movieSchema);

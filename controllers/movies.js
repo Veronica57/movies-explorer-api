@@ -1,7 +1,10 @@
 const Movie = require('../models/movie');
 const NotFoundError = require('../errors/notfound');
 const ForbiddenError = require('../errors/forbidden');
+const BadRequestError = require('../errors/badrequest');
+const { BAD_REQUEST_CODE_MESSAGE, NOT_FOUND_CODE_MESSAGE, FORBIDDEN_ERROR_CODE_MESSAGE } = require('../utils/codes');
 
+//get movies
 const getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
     .orFail(() => new NotFoundError())
@@ -9,6 +12,7 @@ const getMovies = (req, res, next) => {
     .catch(next);
 };
 
+// create movie
 const createMovie = (req, res, next) => {
   const owner = req.user._id;
   const {
@@ -22,7 +26,7 @@ const createMovie = (req, res, next) => {
     nameRU,
     nameEN,
     thumbnail,
-    movieId
+    movieId,
   } = req.body;
 
   Movie.create({
@@ -37,23 +41,43 @@ const createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
     movieId,
-    owner
+    owner,
   })
     .then((movie) => res.send(movie))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError(BAD_REQUEST_CODE_MESSAGE));
+      } else {
+        next(err);
+      }
+    });
 };
 
+// delete movie by ID
 const deleteMovie = (req, res, next) => {
   Movie.findById(req.params.id)
+    .orFail(() => {
+      throw new NotFoundError(NOT_FOUND_CODE_MESSAGE);
+    })
     .then((movie) => {
-      if (!movie) throw new NotFoundError();
-      else if (req.user._id !== movie.owner.toString()) {
-        throw new ForbiddenError();
+      const owner = movie.owner.toString();
+      if (req.user._id === owner) {
+        Movie.deleteOne(movie)
+          .then(() => {
+            res.send(movie);
+          })
+          .catch(next);
       } else {
-        return movie.deleteOne().then(() => res.send(movie));
+        throw new ForbiddenError(FORBIDDEN_ERROR_CODE_MESSAGE);
       }
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError(BAD_REQUEST_CODE_MESSAGE));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports = {

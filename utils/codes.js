@@ -6,7 +6,6 @@ const NOT_FOUND_CODE = 404;
 const CONFLICT_ERROR_CODE = 409;
 const INTERNAL_SERVER_ERROR_CODE = 500;
 
-
 const BAD_REQUEST_CODE_MESSAGE = 'Incorrect data';
 const UNAUTHORIZED_ERROR_CODE_MESSAGE = 'Authorization is required';
 const FORBIDDEN_ERROR_CODE_MESSAGE = 'Impossible to delete';
@@ -18,12 +17,6 @@ const PAGE_NOT_FOUND_MESSAGE = 'Page not found';
 const LOGIN_SUCCESS_MESSAGE = 'Authorization was successful';
 const LOGOUT_MESSAGE = 'Logout complete';
 const LIMITER_MESSAGE = 'You have exceeded the request limit';
-
-const allowedURLs = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://nikeliot.nomoredomainsmonster.ru'
-]
 
 module.exports = {
   CREATED_CODE,
@@ -44,5 +37,4 @@ module.exports = {
   LOGIN_SUCCESS_MESSAGE,
   LOGOUT_MESSAGE,
   LIMITER_MESSAGE,
-  allowedURLs
 };

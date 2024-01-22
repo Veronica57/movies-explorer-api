@@ -2,6 +2,8 @@ const { Joi, celebrate } = require('celebrate');
 const { validator } = require('validator');
 const { BadRequestError } = require('../errors/badrequest');
 
+// const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+
 // validate URL
 const validateUrl = Joi.string()
   .required()
@@ -12,7 +14,7 @@ const validateUrl = Joi.string()
     return helpers.message(BadRequestError);
   });
 
-// login user validation
+// login validation
 const loginValidator = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email({ tlds: { allow: false } }),
@@ -22,20 +24,20 @@ const loginValidator = celebrate({
 
 // create user validation
 const createUserValidator = celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      email: Joi.string().required().email({ tlds: { allow: false } }),
-      password: Joi.string().required(),
-    }),
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email({ tlds: { allow: false } }),
+    password: Joi.string().required(),
+  }),
 });
 
-// create movie valiation
+// create movie validation
 const createMovieValidator = celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),
     duration: Joi.number().required(),
-    year: Joi.string().required(),
+    year: Joi.number().required(),
     description: Joi.string().required(),
     image: validateUrl,
     trailerLink: validateUrl,
@@ -49,7 +51,7 @@ const createMovieValidator = celebrate({
 // delete movie validation
 const deleteMovieValidator = celebrate({
   params: Joi.object().keys({
-    id: Joi.string().required().length(24).hex(),
+    movieId: Joi.string().required().hex().length(24),
   }),
 });
 
@@ -57,9 +59,9 @@ const deleteMovieValidator = celebrate({
 const updateUserValidator = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required().email({ tlds: { allow: false }}),
+    email: Joi.string().required().email({ tlds: { allow: false } }),
   }),
-}); 
+});
 
 module.exports = {
   loginValidator,

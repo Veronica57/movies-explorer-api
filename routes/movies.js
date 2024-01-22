@@ -2,10 +2,10 @@ const movieRouter = require('express').Router();
 const {
   getMovies, createMovie, deleteMovie,
 } = require('../controllers/movies');
-const { createMovieValidator, deleteMovieValidator } = require('../middlewares/validation');
+const { createMovieValidator, deleteMovieValidator } = require('../middlewares/validator');
 
-movieRouter.get('/', getMovies);
-movieRouter.post('/', createMovieValidator, createMovie);
-movieRouter.delete('/:id', deleteMovieValidator, deleteMovie);
+movieRouter.get('/movies', getMovies);
+movieRouter.post('/movies', createMovieValidator, createMovie);
+movieRouter.delete('/movies/:id', deleteMovieValidator, deleteMovie);
 
 module.exports = movieRouter;

@@ -1,21 +1,23 @@
 require('dotenv').config();
+
 const mongoose = require('mongoose');
 const express = require('express');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-const router = require('./routes/index');
-const errorHandler = require('./middlewares/errorHandler');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 const limiter = require('./middlewares/limiter');
-const { MONGO_URL } = require('./utils/config');
+const router = require('./routes/index');
+const error = require('./middlewares/errorHandler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { MONGO_URL_DEV } = require('./utils/config');
 
-const { PORT = 3000 } = process.env;
-mongoose.connect(MONGO_URL)
-    .then(() => console.log('connected to database bitfilmsdb'))
-    .catch((error) => console.log(error));  
 const app = express();
+
+const { PORT = 3000, NODE_ENV, MONGO_URL } = process.env;
+
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV)
+    .then(() => console.log('connected to Database'))
+    .catch((error) => console.log(error)); 
 
 app.use(cors);
 app.use(express.json());
@@ -23,12 +25,10 @@ app.use(express.json());
 app.use(requestLogger); // логгер запросов #1
 app.use(helmet()); // Защита приложения Express
 
-app.use(limiter);// Обработчик ограничений запросов
-app.use(cookieParser);
-
+app.use(limiter); // Обработчик ограничений запросов
 app.use(router); // Обработчики роутов #2
 app.use(errorLogger); // логгер ошибок #3
 app.use(errors()); // обработчик ошибок celebrate #4
-app.use(errorHandler); // server error централизованный обработчик ошибок #5
+app.use(error); // server error централизованный обработчик ошибок #5
 
-app.listen(PORT, () => { console.log(`Listen Port: ${PORT}`)});
+app.listen(console.log(`Listen to Port: ${PORT}`));

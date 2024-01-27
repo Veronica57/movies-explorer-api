@@ -1,4 +1,3 @@
-require('dotenev').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
@@ -10,6 +9,7 @@ const ServerError = require('../errors/serverError');
 const { JWT_SECRET_DEV } = require('../utils/config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
+
 const SALT_ROUND = 10;
 
 // create user

@@ -1,6 +1,5 @@
-const router = require('express').Router();
-
 const auth = require('../middlewares/auth');
+const router = require('express').Router();
 const userRouter = require('./users');
 const movieRouter = require('./movies');
 const NotFoundError = require('../errors/notfound');
@@ -8,7 +7,7 @@ const cors = require('../middlewares/cors');
 const { createUser, login } = require('../controllers/users');
 const { loginValidator, createUserValidator } = require('../middlewares/validator');
 
-router.use(cors);
+// router.use(cors);
 
 router.get('/crash-test', () => {
   setTimeout(() => {
@@ -19,10 +18,12 @@ router.get('/crash-test', () => {
 router.post('/signup', createUserValidator, createUser); // create user
 router.post('/signin', loginValidator, login); // login user
 
-router.use('/', auth, userRouter);
-router.use('/', auth, movieRouter);
+router.use(auth);
 
-router.use('*', auth, (req, res, next) => {
+router.use('/', userRouter);
+router.use('/', movieRouter);
+
+router.use('*', (req, res, next) => {
   next(new NotFoundError('Page Not Found'));
 });
 

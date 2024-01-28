@@ -6,7 +6,7 @@ const { errors } = require('celebrate');
 const cors = require('./middlewares/cors');
 const limiter = require('./middlewares/limiter');
 const router = require('./routes/index');
-const errorHandler = require('./middlewares/errorHandler');
+const error = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { MONGO_URL_DEV } = require('./utils/config');
 
@@ -18,7 +18,6 @@ mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV)
     .then(() => console.log('connected to Database'))
     .catch((error) => console.log(error));
 app.use(cors);
-
 app.use(express.json());
 
 app.use(requestLogger); // логгер запросов #1
@@ -28,6 +27,6 @@ app.use(limiter); // Обработчик ограничений запросо�
 app.use(router); // Обработчики роутов #2
 app.use(errorLogger); // логгер ошибок #3
 app.use(errors()); // обработчик ошибок celebrate #4
-app.use(errorHandler); // server error централизованный обработчик ошибок #5
+app.use(error); // server error централизованный обработчик ошибок #5
 
-app.listen(`Listen to Port: ${PORT}`);
+app.listen(PORT, () => { console.log(`App listen to PORT: ${PORT}`) });

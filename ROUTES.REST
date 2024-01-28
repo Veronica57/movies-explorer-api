@@ -4,8 +4,8 @@ POST http://localhost:3000/signup
 Content-Type: application/json
 
 {
-    "name":"Maxim",
-    "email":"maxim@mail.ru",
+    "name":"Ivan",
+    "email":"ivan@mail.ru",
     "password":"456789"
 }
 

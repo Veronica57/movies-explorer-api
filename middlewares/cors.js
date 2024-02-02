@@ -1,5 +1,8 @@
 const allowedCors = [
-  // domainename,
+  'http://api.nikeliot.nomoredomainsmonster.ru',
+  'https://api.nikeliot.nomoredomainsmonster.ru',
+  'http://nikeliot.nomoredomainsmonster.ru',
+  'https://nikeliot.nomoredomainsmonster.ru',
   'http://localhost:3000',
   'https://localhost:3000',
   'http://localhost:3001',

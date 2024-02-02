@@ -1,4 +1,5 @@
 const { ValidationError } = require('mongoose').Error;
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 

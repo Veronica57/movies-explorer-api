@@ -1,5 +1,6 @@
 const { Joi, celebrate } = require('celebrate');
-const { validator } = require('validator');
+// const { validator } = require('validator');
+const isURL = require('validator/lib/isURL');
 const { BadRequestError } = require('../errors/badrequest');
 
 // const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
@@ -8,7 +9,7 @@ const { BadRequestError } = require('../errors/badrequest');
 const validateUrl = Joi.string()
   .required()
   .custom((value, helpers) => {
-    if (validator.isURL(value)) {
+    if (isURL(value)) {
       return value;
     }
     return helpers.message(BadRequestError);

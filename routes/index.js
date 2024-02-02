@@ -17,6 +17,7 @@ router.post('/signin', loginValidator, login);
 
 router.use('/users', auth, userRouter);
 router.use('/movies', auth, movieRouter);
+router.use('/signout', auth, logout);
 
 router.use('*', auth, (req, res, next) => {
   next(new NotFoundError('Page Not Found'));

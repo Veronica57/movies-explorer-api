@@ -57,7 +57,7 @@ const logout = (req, res, next) => {
     const { email } = req.body;
     User.findOne({ email })
         .then(() => {
-            res.clearCookie('jwt', { httpOnly: true, sameSite: true }).send({ message: 'Logout is completed' });
+            res.clearCookie('jwt', { httpOnly: true, sameSite:'None', secure: true }).send({ message: 'Logout is completed' });
         })
         .catch(next);
 };
@@ -121,7 +121,8 @@ const setToken = (res, user) => {
     res.cookie('jwt', token, {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: true
+        sameSite: 'None',
+        secure: true,
     });
 };
 
